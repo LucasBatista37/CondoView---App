@@ -42,7 +42,8 @@ class UsuarioProvider with ChangeNotifier {
     print("Log: Token removido do armazenamento.");
   }
 
-  Future<void> createUser(String nome, String email, String senha) async {
+  Future<void> createUser(String nome, String email, String senha,
+      {String role = 'morador'}) async {
     final url = Uri.parse('$_baseUrl/api/users/register');
     try {
       final response = await http.post(
@@ -52,6 +53,7 @@ class UsuarioProvider with ChangeNotifier {
           'nome': nome,
           'email': email,
           'senha': senha,
+          'role': role,
         }),
       );
 

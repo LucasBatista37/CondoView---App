@@ -7,7 +7,7 @@ class CondoProvider with ChangeNotifier {
   final String baseUrl = 'https://backend-condoview.onrender.com';
 
   Future<void> createCondo(Condominium condo) async {
-    final url = Uri.parse('$baseUrl/api/users/create-condominium');
+    final url = Uri.parse('$baseUrl/api/users/admin/create-condominium');
 
     try {
       final response = await http.post(

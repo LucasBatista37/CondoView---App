@@ -1,5 +1,8 @@
 import 'package:condoview/components/custom_bottom_navigation_bar.dart';
 import 'package:flutter/material.dart';
+import 'package:provider/provider.dart';
+import 'package:condoview/providers/aviso_provider.dart';
+import 'package:condoview/models/aviso_model.dart';
 
 class SearchScreen extends StatefulWidget {
   const SearchScreen({super.key});
@@ -10,44 +13,25 @@ class SearchScreen extends StatefulWidget {
 }
 
 class _SearchScreenState extends State<SearchScreen> {
-  final List<Map<String, String>> allHistoryData = [
-    {
-      'categoria': 'Mensagem',
-      'data': '2024-08-06',
-      'remetente': 'Síndico',
-      'assunto': 'Reunião de condomínio',
-      'conteudo': 'Aviso sobre a reunião geral.',
-      'anexos': 'Nenhum',
-      'status': 'Lido',
-    },
-    {
-      'categoria': 'Aviso',
-      'data': '2024-08-05',
-      'remetente': 'Administração',
-      'assunto': 'Manutenção programada',
-      'conteudo': 'Manutenção na área comum no dia 10.',
-      'anexos': 'Nenhum',
-      'status': 'Lido',
-    },
-  ];
-
-  List<Map<String, String>> filteredData = [];
   String searchTerm = '';
   String selectedCategory = 'Todos';
+  List<Aviso> filteredData = [];
 
   @override
   void initState() {
     super.initState();
-    filteredData = allHistoryData;
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      Provider.of<AvisoProvider>(context, listen: false).fetchAvisos();
+    });
   }
 
-  void filterData() {
+  void filterData(List<Aviso> avisos) {
     setState(() {
-      filteredData = allHistoryData.where((item) {
+      filteredData = avisos.where((aviso) {
         final matchTerm = searchTerm.isEmpty ||
-            item['assunto']!.toLowerCase().contains(searchTerm.toLowerCase());
-        final matchCategory = selectedCategory == 'Todos' ||
-            item['categoria'] == selectedCategory;
+            aviso.title.toLowerCase().contains(searchTerm.toLowerCase());
+        final matchCategory =
+            selectedCategory == 'Todos' || aviso.title == selectedCategory;
         return matchTerm && matchCategory;
       }).toList();
     });
@@ -55,6 +39,12 @@ class _SearchScreenState extends State<SearchScreen> {
 
   @override
   Widget build(BuildContext context) {
+    final avisoProvider = Provider.of<AvisoProvider>(context);
+    final allAvisos = avisoProvider.avisos;
+
+    // Filtrar os dados sempre que os avisos forem atualizados
+    filterData(allAvisos);
+
     return Scaffold(
       appBar: AppBar(
         backgroundColor: const Color.fromARGB(255, 78, 20, 166),
@@ -80,14 +70,14 @@ class _SearchScreenState extends State<SearchScreen> {
           children: [
             TextField(
               decoration: const InputDecoration(
-                labelText: 'Pesquisar por assunto',
+                labelText: 'Pesquisar por título',
                 border: OutlineInputBorder(),
               ),
               onChanged: (value) {
                 setState(() {
                   searchTerm = value;
                 });
-                filterData();
+                filterData(allAvisos);
               },
             ),
             const SizedBox(height: 16.0),
@@ -97,7 +87,7 @@ class _SearchScreenState extends State<SearchScreen> {
                 setState(() {
                   selectedCategory = newValue!;
                 });
-                filterData();
+                filterData(allAvisos);
               },
               items: <String>['Todos', 'Mensagem', 'Aviso']
                   .map<DropdownMenuItem<String>>((String value) {
@@ -109,50 +99,47 @@ class _SearchScreenState extends State<SearchScreen> {
             ),
             const SizedBox(height: 16.0),
             Expanded(
-              child: ListView.builder(
-                itemCount: filteredData.length,
-                itemBuilder: (context, index) {
-                  final item = filteredData[index];
-                  return Card(
-                    margin: const EdgeInsets.all(8.0),
-                    child: ListTile(
-                      title: Text(item['assunto'] ?? ''),
-                      subtitle: Text('${item['categoria']} - ${item['data']}'),
-                      trailing: const Icon(Icons.arrow_forward),
-                      onTap: () {
-                        showDialog(
-                          context: context,
-                          builder: (context) => AlertDialog(
-                            title: Text(item['assunto'] ?? ''),
-                            content: Column(
-                              crossAxisAlignment: CrossAxisAlignment.start,
-                              children: [
-                                Text('Categoria: ${item['categoria']}'),
-                                Text('Data: ${item['data']}'),
-                                Text('Remetente: ${item['remetente']}'),
-                                const SizedBox(height: 8.0),
-                                const Text('Conteúdo:'),
-                                Text(item['conteudo'] ?? ''),
-                                const SizedBox(height: 8.0),
-                                Text('Anexos: ${item['anexos']}'),
-                                Text('Status: ${item['status']}'),
-                              ],
-                            ),
-                            actions: [
-                              TextButton(
-                                child: const Text('Fechar'),
-                                onPressed: () {
-                                  Navigator.of(context).pop();
-                                },
-                              ),
-                            ],
+              child: avisoProvider.avisos.isEmpty
+                  ? const Center(child: CircularProgressIndicator())
+                  : ListView.builder(
+                      itemCount: filteredData.length,
+                      itemBuilder: (context, index) {
+                        final aviso = filteredData[index];
+                        return Card(
+                          margin: const EdgeInsets.all(8.0),
+                          child: ListTile(
+                            title: Text(aviso.title),
+                            subtitle:
+                                Text('${aviso.description} - ${aviso.time}'),
+                            trailing: const Icon(Icons.arrow_forward),
+                            onTap: () {
+                              showDialog(
+                                context: context,
+                                builder: (context) => AlertDialog(
+                                  title: Text(aviso.title),
+                                  content: Column(
+                                    crossAxisAlignment:
+                                        CrossAxisAlignment.start,
+                                    children: [
+                                      Text('Descrição: ${aviso.description}'),
+                                      Text('Data: ${aviso.time}'),
+                                    ],
+                                  ),
+                                  actions: [
+                                    TextButton(
+                                      child: const Text('Fechar'),
+                                      onPressed: () {
+                                        Navigator.of(context).pop();
+                                      },
+                                    ),
+                                  ],
+                                ),
+                              );
+                            },
                           ),
                         );
                       },
                     ),
-                  );
-                },
-              ),
             ),
           ],
         ),

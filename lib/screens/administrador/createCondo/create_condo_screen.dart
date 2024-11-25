@@ -1,8 +1,8 @@
-import 'package:condoview/models/condominium_model.dart';
-import 'package:condoview/providers/condominium_provider.dart';
-import 'package:condoview/screens/administrador/createCondo/create_admin_screen.dart';
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
+import 'package:condoview/providers/condominium_provider.dart';
+import 'package:condoview/models/condominium_model.dart';
+import 'package:condoview/screens/administrador/createCondo/create_admin_screen.dart';
 
 class CreateCondoScreen extends StatefulWidget {
   const CreateCondoScreen({super.key});
@@ -20,34 +20,34 @@ class _CreateCondoScreenState extends State<CreateCondoScreen> {
   final _phoneController = TextEditingController();
   final _descriptionController = TextEditingController();
 
-  void _submitForm() {
+  void _submitForm() async {
     if (_formKey.currentState!.validate()) {
-      final name = _nameController.text;
-      final address = _addressController.text;
-      final cnpj = _cnpjController.text;
-      final email = _emailController.text;
-      final phone = _phoneController.text;
-      final description = _descriptionController.text;
-
       final condo = Condominium(
-        name: name,
-        address: address,
-        cnpj: cnpj,
-        email: email,
-        phone: phone,
-        description: description,
+        name: _nameController.text,
+        address: _addressController.text,
+        cnpj: _cnpjController.text,
+        email: _emailController.text,
+        phone: _phoneController.text,
+        description: _descriptionController.text,
       );
 
-      Provider.of<CondoProvider>(context, listen: false).createCondo(condo);
+      try {
+        await Provider.of<CondoProvider>(context, listen: false)
+            .createCondo(condo);
 
-      ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(content: Text('Condomínio criado com sucesso!')),
-      );
+        ScaffoldMessenger.of(context).showSnackBar(
+          const SnackBar(content: Text('Condomínio criado com sucesso!')),
+        );
 
-      Navigator.push(
-        context,
-        MaterialPageRoute(builder: (context) => const CreateAdminScreen()),
-      );
+        Navigator.push(
+          context,
+          MaterialPageRoute(builder: (context) => const CreateAdminScreen()),
+        );
+      } catch (error) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(content: Text('Erro ao criar condomínio: $error')),
+        );
+      }
     }
   }
 
@@ -59,16 +59,11 @@ class _CreateCondoScreenState extends State<CreateCondoScreen> {
         foregroundColor: Colors.white,
         leading: IconButton(
           icon: const Icon(Icons.arrow_back),
-          onPressed: () {
-            Navigator.pop(context);
-          },
+          onPressed: () => Navigator.pop(context),
         ),
         title: const Text(
           'Criar condomínio',
-          style: TextStyle(
-            fontSize: 20,
-            fontWeight: FontWeight.bold,
-          ),
+          style: TextStyle(fontSize: 20, fontWeight: FontWeight.bold),
         ),
         centerTitle: true,
       ),
@@ -175,7 +170,9 @@ class _CreateCondoScreenState extends State<CreateCondoScreen> {
                       style: ElevatedButton.styleFrom(
                         backgroundColor: const Color.fromARGB(255, 78, 20, 166),
                         padding: const EdgeInsets.symmetric(
-                            horizontal: 80, vertical: 16),
+                          horizontal: 80,
+                          vertical: 16,
+                        ),
                         shape: RoundedRectangleBorder(
                           borderRadius: BorderRadius.circular(8.0),
                         ),

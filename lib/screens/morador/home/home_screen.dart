@@ -92,7 +92,7 @@ class _HomeScreenState extends State<HomeScreen> {
               ),
             ),
             const Text(
-              'Condomínio Fictício',
+              'Condomínio Atlas',
               style: TextStyle(
                 fontSize: 14,
                 color: Color.fromARGB(136, 255, 255, 255),
