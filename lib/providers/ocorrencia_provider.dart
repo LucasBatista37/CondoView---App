@@ -62,7 +62,7 @@ class OcorrenciaProvider with ChangeNotifier {
       _isLoading = true;
       notifyListeners();
 
-      final response = await http.get(url).timeout(Duration(seconds: 10));
+      final response = await http.get(url).timeout(Duration(seconds: 3));
       print('Requisição feita para: $url');
 
       if (response.statusCode == 200) {

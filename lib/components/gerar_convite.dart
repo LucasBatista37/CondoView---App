@@ -3,6 +3,7 @@ import 'dart:io';
 import 'dart:ui' as ui;
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
+import 'package:logger/logger.dart';
 import 'package:path_provider/path_provider.dart';
 import 'package:share_plus/share_plus.dart';
 import 'package:qr_flutter/qr_flutter.dart';
@@ -51,49 +52,49 @@ class _GerarConviteState extends State<GerarConvite> {
       );
 
       final nameTextPainter = TextPainter(
-        text: TextSpan(text: '${widget.nome}', style: textStyle),
+        text: TextSpan(text: widget.nome, style: textStyle),
         textDirection: TextDirection.ltr,
       );
       nameTextPainter.layout();
       nameTextPainter.paint(canvas, const Offset(125, 113));
 
       final unitTextPainter = TextPainter(
-        text: TextSpan(text: '${widget.unidade}', style: textStyle),
+        text: TextSpan(text: widget.unidade, style: textStyle),
         textDirection: TextDirection.ltr,
       );
       unitTextPainter.layout();
       unitTextPainter.paint(canvas, const Offset(201, 324));
 
       final dateTextPainter = TextPainter(
-        text: TextSpan(text: '${widget.data}', style: textStyle),
+        text: TextSpan(text: widget.data, style: textStyle),
         textDirection: TextDirection.ltr,
       );
       dateTextPainter.layout();
       dateTextPainter.paint(canvas, const Offset(164, 515));
 
       final timeTextPainter = TextPainter(
-        text: TextSpan(text: '${widget.hora}', style: textStyle),
+        text: TextSpan(text: widget.hora, style: textStyle),
         textDirection: TextDirection.ltr,
       );
       timeTextPainter.layout();
       timeTextPainter.paint(canvas, const Offset(166, 454));
 
       final condoTextPainter = TextPainter(
-        text: TextSpan(text: '${widget.condominio}', style: textStyle),
+        text: TextSpan(text: widget.condominio, style: textStyle),
         textDirection: TextDirection.ltr,
       );
       condoTextPainter.layout();
       condoTextPainter.paint(canvas, const Offset(239, 195));
 
       final addressTextPainter = TextPainter(
-        text: TextSpan(text: '${widget.endereco}', style: textStyle),
+        text: TextSpan(text: widget.endereco, style: textStyle),
         textDirection: TextDirection.ltr,
       );
       addressTextPainter.layout();
       addressTextPainter.paint(canvas, const Offset(211, 260));
 
       final hostTextPainter = TextPainter(
-        text: TextSpan(text: '${widget.anfitriao}', style: textStyle),
+        text: TextSpan(text: widget.anfitriao, style: textStyle),
         textDirection: TextDirection.ltr,
       );
       hostTextPainter.layout();
@@ -142,6 +143,8 @@ class _GerarConviteState extends State<GerarConvite> {
     }
   }
 
+  final logger = Logger();
+
   void _shareInvitation() async {
     try {
       final imagePath = await _generateInvitationImage();
@@ -149,8 +152,8 @@ class _GerarConviteState extends State<GerarConvite> {
         [XFile(imagePath)],
         text: 'Aqui está o seu convite de visitante.',
       );
-    } catch (e) {
-      print('Erro ao gerar imagem: $e');
+    } catch (e, stacktrace) {
+      logger.e('Erro ao gerar imagem', error: e, stackTrace: stacktrace);
     }
   }
 

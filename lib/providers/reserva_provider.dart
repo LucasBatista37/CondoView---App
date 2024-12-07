@@ -95,7 +95,7 @@ class ReservaProvider with ChangeNotifier {
 
   void startPolling() {
     _pollingTimer?.cancel();
-    _pollingTimer = Timer.periodic(Duration(seconds: 10), (timer) {
+    _pollingTimer = Timer.periodic(Duration(seconds: 3), (timer) {
       fetchReservas();
     });
   }

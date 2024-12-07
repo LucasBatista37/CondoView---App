@@ -1,10 +1,9 @@
 import 'dart:async';
 import 'dart:convert';
 import 'package:condoview/models/chat_message.dart';
-import 'package:condoview/providers/usuario_provider.dart';
+import 'package:condoview/services/secure_storege_service.dart';
 import 'package:flutter/material.dart';
 import 'package:http/http.dart' as http;
-import 'package:provider/provider.dart';
 
 class ChatProvider with ChangeNotifier {
   final String _baseUrl = 'https://backend-condoview.onrender.com';
@@ -14,14 +13,16 @@ class ChatProvider with ChangeNotifier {
       StreamController<List<ChatMessage>>.broadcast();
   Timer? _pollingTimer;
 
+  final SecureStorageService _secureStorageService = SecureStorageService();
+
   List<ChatMessage> get messages => _messages;
   Stream<List<ChatMessage>> get messagesStream =>
       _messagesStreamController.stream;
 
-  void startPolling(BuildContext context) {
+  void startPolling() {
     _pollingTimer?.cancel();
     _pollingTimer = Timer.periodic(Duration(seconds: 5), (timer) {
-      fetchMessages(context);
+      fetchMessages();
     });
   }
 
@@ -29,11 +30,13 @@ class ChatProvider with ChangeNotifier {
     _pollingTimer?.cancel();
   }
 
-  Future<void> fetchMessages(BuildContext context) async {
+  Future<void> fetchMessages() async {
     try {
-      final usuarioProvider =
-          Provider.of<UsuarioProvider>(context, listen: false);
-      final token = await usuarioProvider.getToken();
+      final token = await _secureStorageService.loadToken();
+      if (token == null) {
+        throw Exception("Token não encontrado. O usuário não está autenticado.");
+      }
+
       print("Log: Token usado para buscar mensagens: $token");
 
       final url = Uri.parse('$_baseUrl/api/users/admin/chat');
@@ -68,7 +71,6 @@ class ChatProvider with ChangeNotifier {
   }
 
   Future<void> sendMessage(
-    BuildContext context,
     String message,
     String? imagePath,
     String? filePath,
@@ -78,20 +80,17 @@ class ChatProvider with ChangeNotifier {
     if (message.isEmpty &&
         (imagePath == null || imagePath.isEmpty) &&
         (filePath == null || filePath.isEmpty)) {
-      print("Log: Nenhum conteúdo para enviar.");
-      ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(
-            content: Text('Mensagem, imagem ou arquivo são obrigatórios.')),
-      );
-      return;
+      throw Exception('Mensagem, imagem ou arquivo são obrigatórios.');
     }
 
     final url = Uri.parse('$_baseUrl/api/users/chat');
 
     try {
-      final usuarioProvider =
-          Provider.of<UsuarioProvider>(context, listen: false);
-      final token = await usuarioProvider.getToken();
+      final token = await _secureStorageService.loadToken();
+      if (token == null) {
+        throw Exception("Token não encontrado. O usuário não está autenticado.");
+      }
+
       print("Log: Token usado para enviar mensagem: $token");
 
       var request = http.MultipartRequest('POST', url);
@@ -138,7 +137,6 @@ class ChatProvider with ChangeNotifier {
       } else {
         print(
             "Log: Erro ao enviar mensagem. Status Code: ${response.statusCode}");
-        print(await response.stream.bytesToString());
         throw Exception('Erro ao enviar mensagem: ${response.statusCode}');
       }
     } catch (error) {

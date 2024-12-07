@@ -3,6 +3,7 @@ import 'dart:convert';
 import 'package:flutter/material.dart';
 import 'package:http/http.dart' as http;
 import 'package:condoview/models/assembleia_model.dart';
+import 'package:logger/logger.dart';
 
 class AssembleiaProvider with ChangeNotifier {
   final String _baseUrl = 'https://backend-condoview.onrender.com';
@@ -42,8 +43,6 @@ class AssembleiaProvider with ChangeNotifier {
     });
 
     try {
-      print('Enviando dados: $requestBody');
-
       final response = await http.post(
         url,
         headers: {
@@ -55,18 +54,17 @@ class AssembleiaProvider with ChangeNotifier {
       if (response.statusCode == 201) {
         notifyListeners();
       } else {
-        print('Erro ao criar assembleia. Código: ${response.statusCode}');
-        print('Resposta: ${response.body}');
         throw Exception(
             'Falha ao criar a assembleia. Verifique os dados enviados.');
       }
     } catch (error) {
-      print('Erro: $error');
-      throw error;
+      rethrow;
     }
   }
 
-    Future<void> fetchAssembleias() async {
+  final logger = Logger();
+
+  Future<void> fetchAssembleias() async {
     try {
       final response = await http.get(
         Uri.parse('$_baseUrl/api/users/admin/assemblies'),
@@ -77,16 +75,17 @@ class AssembleiaProvider with ChangeNotifier {
         _assembleias = data.map((item) => Assembleia.fromJson(item)).toList();
         notifyListeners();
       } else {
-        print('Erro ao carregar assembleias: ${response.statusCode}');
+        logger.e('Erro ao carregar assembleias: ${response.statusCode}');
       }
-    } catch (error) {
-      print('Erro ao buscar assembleias: $error');
+    } catch (error, stacktrace) {
+      logger.e('Erro ao buscar assembleias',
+          error: error, stackTrace: stacktrace);
     }
   }
 
-    void startPolling() {
+  void startPolling() {
     _pollingTimer?.cancel();
-    _pollingTimer = Timer.periodic(Duration(seconds: 10), (timer) {
+    _pollingTimer = Timer.periodic(const Duration(seconds: 3), (timer) {
       fetchAssembleias();
     });
   }
@@ -118,10 +117,11 @@ class AssembleiaProvider with ChangeNotifier {
           notifyListeners();
         }
       } else {
+        logger.e('Falha ao atualizar assembleia: ${response.body}');
         throw Exception('Falha ao atualizar assembleia: ${response.body}');
       }
-    } catch (error) {
-      print('Erro ao atualizar assembleia: $error');
+    } catch (error, stacktrace) {
+      logger.e('Erro ao atualizar assembleia', error: error, stackTrace: stacktrace);
     }
   }
 

@@ -13,7 +13,6 @@ class AdicionarMoradorScreen extends StatefulWidget {
 
 class _AdicionarMoradorScreenState extends State<AdicionarMoradorScreen> {
   final TextEditingController _emailController = TextEditingController();
-  final TextEditingController _telefoneController = TextEditingController();
   final List<String> _funcionalidadeAdicionada = [
     'Morador',
     'Síndico',

@@ -32,7 +32,7 @@ class Aviso {
     String? time,
   }) {
     return Aviso(
-      id: this.id,
+      id: id,
       icon: icon ?? this.icon,
       title: title ?? this.title,
       description: description ?? this.description,

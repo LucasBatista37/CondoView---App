@@ -46,7 +46,7 @@ class AdminGrid extends StatelessWidget {
             _buildAdminItem(
               Icons.check_circle,
               'Reserva',
-              VisualizarReservasScreen(),
+              const VisualizarReservasScreen(),
               context,
             ),
             _buildAdminItem(

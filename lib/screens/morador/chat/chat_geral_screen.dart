@@ -25,7 +25,7 @@ class _ChatGeralScreenState extends State<ChatGeralScreen> {
   void initState() {
     super.initState();
     _loadMessages();
-    Provider.of<ChatProvider>(context, listen: false).startPolling(context);
+    Provider.of<ChatProvider>(context, listen: false).startPolling();
   }
 
   @override
@@ -37,8 +37,7 @@ class _ChatGeralScreenState extends State<ChatGeralScreen> {
   Future<void> _loadMessages() async {
     try {
       print("Tentando carregar mensagens...");
-      await Provider.of<ChatProvider>(context, listen: false)
-          .fetchMessages(context);
+      await Provider.of<ChatProvider>(context, listen: false).fetchMessages();
       print("Mensagens carregadas com sucesso.");
     } catch (error) {
       print("Erro ao carregar mensagens: $error");
@@ -307,10 +306,9 @@ class _ChatGeralScreenState extends State<ChatGeralScreen> {
 
     try {
       await chatProvider.sendMessage(
-        context,
         message,
         _image?.path,
-        _fileName,
+        _fileName ?? '', // Corrige o tipo para String
         userId,
         userName,
       );

@@ -9,6 +9,7 @@ class AvisoDetalhesScreen extends StatefulWidget {
   const AvisoDetalhesScreen({super.key, required this.id});
 
   @override
+  // ignore: library_private_types_in_public_api
   _AvisoDetalhesScreenState createState() => _AvisoDetalhesScreenState();
 }
 
@@ -41,18 +42,11 @@ class _AvisoDetalhesScreenState extends State<AvisoDetalhesScreen> {
     final avisoProvider = Provider.of<AvisoProvider>(context, listen: false);
     _aviso = avisoProvider.getAvisoById(widget.id);
 
-    if (_aviso == null) {
-      ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(content: Text('Aviso não encontrado.')),
-      );
-      Navigator.pop(context);
-    } else {
-      _titleController.text = _aviso.title;
-      _descriptionController.text = _aviso.description;
-      _dateController.text = _aviso.time;
-      _selectedIcon = _aviso.icon;
+    _titleController.text = _aviso.title;
+    _descriptionController.text = _aviso.description;
+    _dateController.text = _aviso.time;
+    _selectedIcon = _aviso.icon;
     }
-  }
 
   void _toggleEditing() {
     setState(() {
@@ -70,11 +64,14 @@ class _AvisoDetalhesScreenState extends State<AvisoDetalhesScreen> {
     );
 
     avisoProvider.updateAviso(updatedAviso).then((_) {
+      // ignore: use_build_context_synchronously
       Navigator.pop(context);
+      // ignore: use_build_context_synchronously
       ScaffoldMessenger.of(context).showSnackBar(
         const SnackBar(content: Text('Aviso atualizado com sucesso!')),
       );
     }).catchError((error) {
+      // ignore: use_build_context_synchronously
       ScaffoldMessenger.of(context).showSnackBar(
         SnackBar(content: Text('Erro ao atualizar aviso: $error')),
       );

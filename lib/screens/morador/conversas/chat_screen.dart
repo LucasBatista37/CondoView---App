@@ -24,7 +24,7 @@ class _ChatScreenState extends State<ChatScreen> {
   File? _image;
   String? _fileName;
   List<ChatMessage> _messages = [];
-  bool _isLoading = true;
+  bool _isLoading = false;
   Timer? _pollingTimer;
 
   @override
@@ -51,7 +51,8 @@ class _ChatScreenState extends State<ChatScreen> {
       final personalChatProvider =
           Provider.of<PersonalChatProvider>(context, listen: false);
 
-      await personalChatProvider.fetchMessages(context, widget.receiverId);
+      await personalChatProvider.fetchMessages(
+          context as String, widget.receiverId);
 
       setState(() {
         _messages = personalChatProvider.messages
@@ -111,28 +112,21 @@ class _ChatScreenState extends State<ChatScreen> {
       return;
     }
 
-    print("Log: Texto da mensagem: $messageText");
-    print("Log: Caminho da imagem: ${_image?.path}");
-    print("Log: Nome do arquivo: $_fileName");
-
     final personalChatProvider =
         Provider.of<PersonalChatProvider>(context, listen: false);
     final usuarioProvider =
         Provider.of<UsuarioProvider>(context, listen: false);
-    final userName = usuarioProvider.usuario?.nome ?? "Desconhecido";
 
-    print("Log: Chamando sendMessage no PersonalChatProvider");
-    print("Log: Nome do destinatário: ${widget.name}");
-    print("Log: ID do destinatário: ${widget.receiverId}");
-    print("Log: Nome do usuário atual: $userName");
+    final userName = usuarioProvider.usuario?.nome ?? "Usuário Desconhecido";
+    final currentUserId = usuarioProvider.usuario?.id ?? "ID desconhecido";
 
     await personalChatProvider.sendMessage(
-      context,
-      messageText,
-      _image?.path,
-      null,
-      widget.receiverId,
-      userName,
+      messageText, 
+      _image?.path, 
+      _fileName ?? '', 
+      widget.receiverId, 
+      userName, 
+      currentUserId, 
     );
 
     setState(() {

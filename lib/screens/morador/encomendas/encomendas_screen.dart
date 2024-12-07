@@ -10,6 +10,7 @@ class EncomendasScreen extends StatefulWidget {
   const EncomendasScreen({super.key});
 
   @override
+  // ignore: library_private_types_in_public_api
   _EncomendasScreenState createState() => _EncomendasScreenState();
 }
 
@@ -89,12 +90,11 @@ class _EncomendasScreenState extends State<EncomendasScreen> {
       child: ListTile(
         leading: ClipRRect(
           borderRadius: BorderRadius.circular(8.0),
-          child: encomenda.imagePath != null && encomenda.imagePath.isNotEmpty
+          child: encomenda.imagePath.isNotEmpty
               ? Builder(
                   builder: (context) {
                     final imageUrl =
-                        'https://backend-condoview.onrender.com/uploads/package/' +
-                            encomenda.imagePath.replaceAll(r'\', '/');
+                        'https://backend-condoview.onrender.com/uploads/package/${encomenda.imagePath.replaceAll(r'\', '/')}';
                     debugPrint(
                         'Caminho da imagem da encomenda corrigido: $imageUrl');
 

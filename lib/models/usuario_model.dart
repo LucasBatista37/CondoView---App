@@ -20,7 +20,6 @@ class Usuario {
   });
 
   factory Usuario.fromJson(Map<String, dynamic> json) {
-    print('Log: Mapeando dados do usuário no fromJson: $json');
     return Usuario(
       id: json['_id'] ?? '',
       nome: json['nome'] ?? 'Nome não informado',
